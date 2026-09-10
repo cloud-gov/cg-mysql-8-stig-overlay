@@ -6,9 +6,13 @@ user: <user>
 #Value Type: string
 password: <password>
 
-#Description: hostname of MySQL DB Server
+#Description: hostname of MySQL DB Server. When using an
+# SSH tunnel on the host, this 127.0.0.1. When the Cinc-auditor
+# process is running as a container on that host, then
+# use `host.docker.internal` (or podman equivalent).
 #Value Type:
-host: 127.0.0.1
+# host: 127.0.0.1
+host: host.docker.internal
 
 #Description: port MySQL DB Server
 #Value Type: numeric
@@ -50,7 +54,7 @@ mysql_administrative_grantees: ["'root'@'localhost'", "'rds_superuser_role'@'%'"
 
 #Description: List of approved Plugins
 #Value Type: array
-approved_plugins: ["audit_log", "auth_socket", "SERVER_AUDIT"]
+approved_plugins: ["audit_log", "auth_socket", "SERVER_AUDIT", "RDS_SECURITY_AUDIT"]
 
 #Description: List of approved components
 #Value Type: array
@@ -77,10 +81,10 @@ mycnf: /etc/my.cnf
 #Value Type: string
 mysqld_auto_cnf: /var/lib/mysql/auto.cnf
 
-#Description: Authorized procedures for SV-235180 
+#Description: Authorized procedures for SV-235180
 #Value Type: array
 # These are all included with AWS RDS
-authorized_procedures:  
+authorized_procedures:
  - "rds_group_replication_advance_gtid"
  - "rds_group_replication_create_user"
  - "rds_group_replication_set_recovery_channel"
@@ -103,12 +107,20 @@ authorized_procedures:
  - "rds_start_upgrade_prechecks"
  - "rds_stop_replication_for_channel"
  - "rds_stop_upgrade_prechecks"
+ - "rds_external_source"
+ - "rds_next_source_log"
+ - "rds_reset_external_source"
+ - "rds_set_external_source"
+ - "rds_set_external_source_with_auto_position"
+ - "rds_set_external_source_with_delay"
+ - "rds_set_source_auto_position"
 
 
-#Description: Authorized functions for SV-235180 
+
+#Description: Authorized functions for SV-235180
 #Value Type: array
 # These are all included with AWS RDS
-authorized_functions: 
+authorized_functions:
   - "rds_is_semi_sync"
   - "rds_replication_service_state"
   - "rds_replication_service_state_for_channel"
@@ -125,11 +137,11 @@ org_name: "DOD"
 # Value Type: numeric
 # Reference https://stigviewer.com/stigs/oracle_mysql_8.0/2024-09-04/finding/V-235096
 # Reference: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.MaxConnections
-# The control is written in the context of a multi-user MySQL instance, where setting 
-# a max_user_connections can help prevent any single user from DOS/resource exhaustion. 
+# The control is written in the context of a multi-user MySQL instance, where setting
+# a max_user_connections can help prevent any single user from DOS/resource exhaustion.
 #
 # But in our systems we generally have only a single user of a DB, so setting a max_user_connections
-# value that is too low may be the cause of DOS, not a preventative measure. 
-# Our policy for SV-235096 is that max_user_connections should be 
+# value that is too low may be the cause of DOS, not a preventative measure.
+# Our policy for SV-235096 is that max_user_connections should be
 # set to ensure some "headroom" for administrative connections
 max_user_connection_headroom: 10
