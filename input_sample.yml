@@ -10,6 +10,10 @@ password: <password>
 # SSH tunnel on the host, this 127.0.0.1. When the Cinc-auditor
 # process is running as a container on that host, then
 # use `host.docker.internal` (or podman equivalent).
+# NOTE: `host.docker.internal` resolves automatically only on Docker
+# Desktop (macOS/Windows). On Linux Docker or Podman you must pass
+# `--add-host=host.docker.internal:host-gateway` to `docker run`
+# (see README), or use `host: 127.0.0.1` below instead.
 #Value Type:
 # host: 127.0.0.1
 host: host.docker.internal
@@ -53,6 +57,10 @@ mysql_administrative_users: ["csb", "rds_superuser_role"]
 mysql_administrative_grantees: ["'root'@'localhost'", "'rds_superuser_role'@'%'"]
 
 #Description: List of approved Plugins
+# RDS_SECURITY_AUDIT (https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/WhatsNew.html)
+# "MySQL 8.4.6 includes the addition of the rds_security_audit database plugin"
+# Confirmed AWS support request: [Case 178032705706853]: "Undocumented rds_security_audit database plugin"
+# 1 June 2025.
 #Value Type: array
 approved_plugins: ["audit_log", "auth_socket", "SERVER_AUDIT", "RDS_SECURITY_AUDIT"]
 
@@ -126,8 +134,11 @@ authorized_functions:
   - "rds_replication_service_state_for_channel"
 
 #Description: Approved minimum version of MySQL
+# SV-235194 (SI-2 c) asserts the running version is >= this value, so it must
+# track the deployed engine, not the 8.0 benchmark. Set to the lowest AWS RDS
+# 8.4.x offered so an out-of-date minor fails the patch-currency check.
 #Value Type: string
-minimum_mysql_version: 8.0.40
+minimum_mysql_version: 8.4.5
 
 #Description: Name of organization running this profile
 # org_name: "Cloud.gov"

@@ -4,6 +4,10 @@ Cloud.gov overlay for the baseline InSpec profile at <https://github.com/mitre/o
 
 The baseline InSpec profile is used to validate the secure configuration of Oracle MySQL 8.x exactly against DISA's Oracle MySQL 8.0 (STIG) Version 1 Release 1.
 
+The STIG U_Oracle_MySQL_8-0_V2R2_Revision_History.pdf indicates it applies to "Oracle MySQL 8.x STIG", despite the "8-0" in the STIG name.
+
+Some individual baseline assertions still encode MySQL 8.0-specific behavior that differs on 8.4 (e.g. `SV-235138` expects `mysql_native_password`, whereas 8.4 defaults to `caching_sha2_password`); these are tracked in [issue #12](https://github.com/cloud-gov/cg-mysql-8-stig-overlay/issues/12).
+
 This Overlay profile clearly distinguishes and measures compliance to OUR policy requirements without modification to the baseline profile or misrepresentation that we are exactly compliant with the original Benchmark. This overlay allows us to show compliance with our own vetted requirements.
 
 This overlay work is based on upstream work at <https://github.com/mitre/sample-mysql-overlay>.
@@ -39,8 +43,13 @@ Auditing is currently done on-demand from a Cloud.gov platform operator's workst
   - delete the file when your work is done
 - Run `cinc-auditor` for the profile:
 
+  The `--add-host=host.docker.internal:host-gateway` flag makes
+  `host.docker.internal` resolve on Linux Docker and Podman. It is harmless
+  on Docker Desktop (macOS/Windows), where the hostname already resolves. If
+  you set `host: 127.0.0.1` in `input.yml` instead, the flag is not needed.
+
   ```sh
-  docker run -v $(pwd):/share cinc-mysql exec . \
+  docker run --add-host=host.docker.internal:host-gateway -v $(pwd):/share cinc-mysql exec . \
     --show-progress --input-file input.yml  \
     --reporter=cli json:reports/$(date +'%Y-%m-%dH%H%M').json
   ```
@@ -48,7 +57,7 @@ Auditing is currently done on-demand from a Cloud.gov platform operator's workst
 - Or run `cinc-auditor` for a single control, e.g.:
 
   ```sh
-  docker run -v $(pwd):/share cinc-mysql exec . \
+  docker run --add-host=host.docker.internal:host-gateway -v $(pwd):/share cinc-mysql exec . \
     --show-progress --input-file input.yml \
     --reporter=cli json:reports/$(date +'%Y-%m-%dH%H%M').json \
     --controls 'SV-235096'
