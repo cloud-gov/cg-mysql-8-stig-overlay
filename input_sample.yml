@@ -135,8 +135,8 @@ authorized_functions:
 
 #Description: Approved minimum version of MySQL
 # SV-235194 (SI-2 c) asserts the running version is >= this value, so it must
-# track the deployed engine, not the 8.0 benchmark. Set to the lowest AWS RDS
-# 8.4.x offered so an out-of-date minor fails the patch-currency check.
+# track the deployed engine. Set to the lowest AWS RDS 8.4.x offered so an
+# out-of-date minor fails the patch-currency check.
 #Value Type: string
 minimum_mysql_version: 8.4.5
 
